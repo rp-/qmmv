@@ -42,12 +42,13 @@ def renamefiles(args):
         newpath = os.path.join(args.out_dir, args.format.format(**d))
         if not 'ext' in args.format:
             newpath += '.' + d['ext']
-        try:
-            os.makedirs(os.path.dirname(newpath))
-        except OSError as err:
-            if err.errno != 17:
-                raise err
+
         if not args.dry:
+            try:
+                os.makedirs(os.path.dirname(newpath))
+            except OSError as err:
+                if err.errno != 17:
+                    raise err
             shutil.move(origpath, newpath)
         print("{dry}moved: {path}".format(dry=drystr, path=newpath))
 
