@@ -29,26 +29,27 @@ def id3todict(id3):
 def renamefiles(args):
     drystr = "[dry]" if args.dry else ""
 
+    filelist = list()
     if args.recursive:
         print('rec')
-    else:
-        filelist = [x for x in os.listdir(args.in_dir)
-                    if os.path.splitext(x)[1][1:] in supportedextensions]
-        for mfile in filelist:
-            origpath = os.path.join(args.in_dir, mfile)
-            d = id3todict(EasyID3(origpath))
-            d['ext'] = os.path.splitext(x)[1][1:]
-            newpath = os.path.join(args.out_dir, args.format.format(**d))
-            if not 'ext' in args.format:
-                newpath += '.' + d['ext']
-            try:
-                os.makedirs(os.path.dirname(newpath))
-            except OSError as err:
-                if err.errno != 17:
-                    raise err
-            if not args.dry:
-                shutil.move(origpath, newpath)
-            print("{dry}moved: {path}".format(dry=drystr, path=newpath))
+
+    filelist = [x for x in os.listdir(args.in_dir)
+                if os.path.splitext(x)[1][1:] in supportedextensions]
+    for mfile in filelist:
+        origpath = os.path.join(args.in_dir, mfile)
+        d = id3todict(EasyID3(origpath))
+        d['ext'] = os.path.splitext(x)[1][1:]
+        newpath = os.path.join(args.out_dir, args.format.format(**d))
+        if not 'ext' in args.format:
+            newpath += '.' + d['ext']
+        try:
+            os.makedirs(os.path.dirname(newpath))
+        except OSError as err:
+            if err.errno != 17:
+                raise err
+        if not args.dry:
+            shutil.move(origpath, newpath)
+        print("{dry}moved: {path}".format(dry=drystr, path=newpath))
 
 
 def main():
