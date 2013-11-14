@@ -19,8 +19,9 @@ def id3todict(id3):
     data['artist'] = get(id3, 'artist')
     data['album'] = get(id3, 'album')
     data['title'] = get(id3, 'title')
-    data['date'] = int(get(id3, 'date'))
-    data['tracknumber'] = int(get(id3, 'tracknumber'))
+    data['date'] = get(id3, 'date')
+    data['year'] = data['date'][:4]
+    data['tracknumber'] = int(get(id3, 'tracknumber').split('/')[0])
     return data
 
 
