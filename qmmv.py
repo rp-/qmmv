@@ -4,6 +4,7 @@ import sys
 import os
 import argparse
 import shutil
+import ConfigParser as configparser
 from mutagen.easyid3 import EasyID3
 
 #defaultformat = "{tracknumber}-{artist}-{album}-{title}.{ext}"
@@ -27,8 +28,6 @@ def id3todict(id3):
 
 def renamefiles(args):
     drystr = "[dry]" if args.dry else ""
-    if not args.format:
-        args.format = defaultformat
 
     if args.recursive:
         print('rec')
@@ -60,7 +59,19 @@ def main():
     parser.add_argument('in_dir', help="search dir for music files")
     parser.add_argument('out_dir', help="output base directory")
 
-    renamefiles(parser.parse_args())
+    args = parser.parse_args()
+
+    # load config
+    configpath = os.path.expanduser('~/.config/qmmv/config')
+    if os.path.exists(configpath):
+        cp = configparser.ConfigParser({'format': defaultformat})
+        cp.read(configpath)
+        if not args.format:
+            args.format = cp.get('default', 'format')
+    else:
+        args.format = defaultformat
+
+    renamefiles(args)
     return 0
 
 if __name__ == "__main__":
