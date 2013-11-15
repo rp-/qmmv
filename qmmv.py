@@ -5,24 +5,35 @@ import os
 import argparse
 import shutil
 import ConfigParser as configparser
-from mutagen.easyid3 import EasyID3
+import mutagen
 
 #defaultformat = "{tracknumber}-{artist}-{album}-{title}.{ext}"
 defaultformat = "{artist}/{album}/{tracknumber:02d}-{artist}-{title}.{ext}"
-supportedextensions = ['mp3', 'ogg']
+supportedextensions = ['mp3', 'ogg', 'm4a']
 
 
-def id3todict(id3):
+def tagdatatodict(tagdata):
     def get(d, k):
         return "" if len(d[k]) == 0 else d[k][0]
 
+    def gettrknr(val):
+        if isinstance(val, tuple):
+            return val[0]
+        return int(val.split('/')[0])
+
     data = dict()
-    data['artist'] = get(id3, 'artist')
-    data['album'] = get(id3, 'album')
-    data['title'] = get(id3, 'title')
-    data['date'] = get(id3, 'date')
+    keys = {'artist': 'artist', 'album': 'album',
+            'title': 'title', 'date': 'date',
+            'tracknumber': 'tracknumber'}
+
+#    print(tagdata, type(tagdata))
+    data['artist'] = get(tagdata, 'artist')
+    data['album'] = get(tagdata, 'album')
+    data['title'] = get(tagdata, 'title')
+    data['date'] = get(tagdata, 'date')
     data['year'] = data['date'][:4]
-    data['tracknumber'] = int(get(id3, 'tracknumber').split('/')[0])
+    data['tracknumber'] = gettrknr(get(tagdata, 'tracknumber'))
+    #print(data)
     return data
 
 
@@ -37,8 +48,8 @@ def renamefiles(args):
                 if os.path.splitext(x)[1][1:] in supportedextensions]
     for mfile in filelist:
         origpath = os.path.join(args.in_dir, mfile)
-        d = id3todict(EasyID3(origpath))
-        d['ext'] = os.path.splitext(x)[1][1:]
+        d = tagdatatodict(mutagen.File(origpath, easy=True))
+        d['ext'] = os.path.splitext(mfile)[1][1:]
         newpath = os.path.join(args.out_dir, args.format.format(**d))
         if not 'ext' in args.format:
             newpath += '.' + d['ext']
