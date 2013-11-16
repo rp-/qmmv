@@ -70,17 +70,19 @@ def main():
     parser.add_argument('-r', '--recursive', action="store_true", help="look recursive in in_dir")
     parser.add_argument('-d', '--dry', action="store_true", help="don't actually copy anything, just show")
     parser.add_argument('in_dir', help="search dir for music files")
-    parser.add_argument('out_dir', help="output base directory")
+    parser.add_argument('out_dir', default=None, nargs='?', help="output base directory, read from config else same as in_dir")
 
     args = parser.parse_args()
 
     # load config
     configpath = os.path.expanduser('~/.config/qmmv/config')
     if os.path.exists(configpath):
-        cp = configparser.ConfigParser({'format': defaultformat})
+        cp = configparser.ConfigParser({'format': defaultformat, 'out_dir': args.in_dir})
         cp.read(configpath)
         if not args.format:
             args.format = cp.get('default', 'format')
+        if not args.out_dir:
+            args.out_dir = cp.get('default', 'out_dir')
     else:
         args.format = defaultformat
 
